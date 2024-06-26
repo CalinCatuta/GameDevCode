@@ -14,8 +14,13 @@ public class EnemyStats : MonoBehaviour, IDamageable
     [HideInInspector]
     public float currentDamage;
 
+    Animator animator;
+    Enemy enemy;
+
     private void Awake() {
+        animator = GetComponent<Animator>();
         enemySpawner = FindObjectOfType<EnemySpawner>();
+        enemy = GetComponent<Enemy>();
         currentHealth = enemyStats.MaxHealth;
         currentSpeed = enemyStats.MoveSpeed;
         currentDamage = enemyStats.Damage;
@@ -34,8 +39,28 @@ public class EnemyStats : MonoBehaviour, IDamageable
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            Kill();
+            enemy.StopMovement(); // Stop enemy movement
+            //animator.SetTrigger("Die");
+
+            if (HasAnimatorParameter(animator, "Die"))
+            {
+                animator.SetTrigger("Die");
+            }
+            else
+            {
+                Kill();
+            }
         }
+    }
+    private bool HasAnimatorParameter(Animator animator, string parameterName) {
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == parameterName)
+            {
+                return true;
+            }
+        }
+        return false;
     }
     void Kill() {
         enemySpawner.OnEnemyDeath();
